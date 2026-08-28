@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * فونت وزیرمتن — لوکال.
+ *
+ * مشکل نسخه ۱: نام فونت در همه کامپوننت‌ها صدا زده شده بود ولی
+ * هیچ جا لود نمی‌شد. کل اپ با فونت پیش‌فرض سیستم رندر می‌شد.
+ *
+ * از CDN گوگل استفاده نمی‌کنیم: هم در ایران قابل دسترس نیست،
+ * هم اپ باید آفلاین کار کند.
+ *
+ * اگر فایل‌های رسمی وزیرمتن در پوشه موجود باشند، از آن‌ها استفاده می‌شود.
+ * در این نسخه یک فونت عربی آفلاین جایگزین هم قرار داده شده تا اپ روی
+ * دستگاه بدون اینترنت، خوانا بماند.
+ */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/assets/fonts/roza-font-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RozaArabicFallback';
+  src: url('/assets/fonts/NotoSansArabic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RozaArabicFallback';
+  src: url('/assets/fonts/NotoSansArabic-Bold.ttf') format('truetype');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/assets/fonts/roza-font-medium.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/assets/fonts/roza-font-bold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Vazirmatn', 'RozaArabicFallback', 'Segoe UI', Tahoma, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    /*
+     * مشکل نسخه ۱: تقریباً همه متن‌ها text-xs یا ۱۰-۱۱ پیکسل بودند.
+     * فارسی در این سایز روی موبایل خوانا نیست. با بزرگ کردن پایه،
+     * همه کلاس‌های rem یکجا بزرگ می‌شوند.
+     */
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+
+    /*
+     * فاصله‌ی امن سیستم — یک منبع واحد برای همه‌ی جاهایی که باید از
+     * زیر نوار ناوبری اندروید (سه‌دکمه‌ای یا اشاره‌ای) فاصله بگیرند.
+     *
+     * مشکل: نوار پایین برنامه (BottomNavigation) و بقیه‌ی جاهایی که
+     * زیرشان padding ثابت (مثل pb-28) داشتند، فقط برای حالت ناوبری
+     * اشاره‌ای (Gesture) که فاصله‌ی سیستمی کمی دارد کافی بود. در حالت
+     * سه‌دکمه‌ای (3-Button Navigation)، اندروید یک نوار غیرشفاف و بلندتر
+     * در پایین صفحه رزرو می‌کند؛ چون هیچ‌جا این فاصله را از سیستم
+     * نمی‌پرسید، محتوا زیر آن نوار می‌رفت.
+     *
+     * env(safe-area-inset-bottom) همان فاصله‌ی واقعی را — چه ۰ (اشاره‌ای)
+     * چه چند ده پیکسل (سه‌دکمه‌ای) — از خود سیستم می‌گیرد. با تعریف یک
+     * متغیر مرکزی، هر جای اپ که به این فاصله نیاز دارد فقط
+     * calc(var(--safe-bottom) + مقدار خودش) را اضافه می‌کند، نه یک عدد
+     * ثابت حدسی.
+     */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  body {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    font-family: var(--font-sans);
+    direction: rtl;
+    background-color: #faf8f5;
+    color: #1e293b;
+    overflow-x: hidden;
+    line-height: 1.85;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* حداقل سایز خوانا برای فارسی — جلوی متن ریز را می‌گیرد */
+  .text-2xs,
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem !important;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.6;
+  }
+
+  /* دکمه‌ها حداقل سطح لمس ۴۴ پیکسلی داشته باشند */
+  button, [role='button'], label.cursor-pointer {
+    min-height: 44px;
+  }
+  button.icon-only {
+    min-height: 0;
+  }
+
+  input, select, textarea {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    min-height: 44px;
+  }
+
+  input[type='checkbox'] {
+    appearance: none;
+    width: 46px;
+    height: 26px;
+    min-height: 26px;
+    border-radius: 999px;
+    background: #dce3ec;
+    position: relative;
+    cursor: pointer;
+    transition: background .18s ease;
+    vertical-align: middle;
+  }
+  input[type='checkbox']::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 3px;
+    left: 3px;
+    border-radius: 50%;
+    background: #fffdfa;
+    box-shadow: 0 1px 4px rgba(35,51,75,.22);
+    transition: transform .18s ease;
+  }
+  input[type='checkbox']:checked { background: #d77682; }
+  input[type='checkbox']:checked::after { transform: translateX(20px); }
+
+  input[type='range'] {
+    min-height: 32px;
+  }
+  input[type='range'].range-compact {
+    min-height: 22px;
+  }
+
+  ::selection {
+    background: rgba(244, 63, 94, 0.2);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* کارت شیشه‌ای روشن — نسخه ۱ فقط نسخه تاریک داشت که روی تم روشن بد دیده می‌شد */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(235, 224, 212, 0.9);
+}
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(51, 65, 85, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

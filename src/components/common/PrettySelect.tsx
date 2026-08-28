@@ -1,0 +1,13 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Check, ChevronDown } from 'lucide-react';
+
+interface Option { value: string; label: string; description?: string; }
+interface Props { label?: string; value: string; options: Option[]; onChange: (value: string) => void; placeholder?: string; }
+
+/** انتخاب‌گر آفلاین و لمس‌پذیر، جایگزین select خام مرورگر. */
+export const PrettySelect: React.FC<Props> = ({ label, value, options, onChange, placeholder = 'انتخاب کنید' }) => {
+  const [open, setOpen] = useState(false); const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((item) => item.value === value);
+  useEffect(() => { const close = (event: PointerEvent) => { if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false); }; document.addEventListener('pointerdown', close); return () => document.removeEventListener('pointerdown', close); }, []);
+  return <div ref={ref} className="relative space-y-1.5">{label && <label className="text-sm font-bold text-slate-700 dark:text-slate-300 block">{label}</label>}<button type="button" onClick={() => setOpen((state) => !state)} className={`w-full min-h-[52px] px-4 rounded-2xl border flex items-center justify-between gap-3 text-right transition-colors ${open ? 'border-rose-400 bg-rose-50/50 dark:bg-rose-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}><span className="min-w-0"><strong className="block text-sm font-black text-slate-800 dark:text-white truncate">{selected?.label || placeholder}</strong>{selected?.description && <small className="block mt-0.5 text-xs text-slate-500 truncate">{selected.description}</small>}</span><ChevronDown className={`w-5 h-5 text-slate-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} /></button>{open && <div className="absolute z-30 top-full left-0 right-0 mt-2 p-2 rounded-2xl bg-[#fffdf9] dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl max-h-64 overflow-y-auto">{options.map((item) => <button type="button" key={item.value} onClick={() => { onChange(item.value); setOpen(false); }} className={`w-full min-h-[50px] px-3 py-2 rounded-xl flex items-center justify-between gap-3 text-right hover:bg-rose-50 dark:hover:bg-slate-800 ${item.value === value ? 'bg-rose-50 dark:bg-rose-950/30' : ''}`}><span><strong className="block text-sm font-bold text-slate-800 dark:text-white">{item.label}</strong>{item.description && <small className="block text-xs text-slate-500 mt-0.5">{item.description}</small>}</span>{item.value === value && <Check className="w-4 h-4 text-rose-500 shrink-0" />}</button>)}</div>}</div>;
+};
