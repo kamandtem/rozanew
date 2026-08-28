@@ -328,6 +328,7 @@ export const CycleDashboard: React.FC<CycleDashboardProps> = ({
           <div className="space-y-1">
             <h4 className="text-sm font-black text-slate-800 dark:text-white">روز اول پریود را انتخاب کن</h4>
             <JalaliDatePicker value={manualDate} onChange={setManualDate} allowFuture={false} inline compact />
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">با فلش‌های بالای تقویم می‌تونی ماه قبل رو هم ببینی.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-1">

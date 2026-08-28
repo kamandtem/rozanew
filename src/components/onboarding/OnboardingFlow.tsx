@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Check, Moon, ShieldCheck, Sparkles, HeartPulse } from 'lucide-react';
 import { motion } from 'motion/react';
 import { MenstrualCycleConfig, SkinType, UserState } from '../../types';
@@ -101,6 +101,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) =>
       setLocationStatus('denied');
     }
   };
+
+  /*
+   * قبلاً درخواست Permission موقعیت کاملاً دستی بود: کاربر باید خودش دکمه‌ی
+   * کوچک «استفاده از موقعیت دقیق من» را در این مرحله پیدا می‌کرد و می‌زد؛
+   * اگر رد می‌شد یا اصلاً متوجه دکمه نمی‌شد، پرامپت بومی Permission هرگز
+   * نمایش داده نمی‌شد و قابلیت GPS/آب‌وهوا برای همیشه بلااستفاده می‌ماند.
+   * حالا همان مرحله (۲) که توضیح «شهر فقط برای آب‌وهوا» را هم نشان می‌دهد،
+   * به‌محض ورود یک‌بار خودکار Permission را درخواست می‌کند — locationService
+   * (ensurePermission) خودش قبل از هر پرامپتی وضعیت فعلی را چک می‌کند، پس
+   * اگر قبلاً اجازه داده/رد دائمی شده، دوباره مزاحم کاربر نمی‌شود. دکمه‌ی
+   * دستی برای تلاش دوباره (مثلاً بعد از رد اولیه) همچنان باقی می‌ماند.
+   */
+  const autoLocationRequestedRef = useRef(false);
+  useEffect(() => {
+    if (step !== 2 || autoLocationRequestedRef.current) return;
+    autoLocationRequestedRef.current = true;
+    requestLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const finish = () => {
     const current = LocalDB.getUserState();
@@ -399,6 +418,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) =>
                   allowFuture={false}
                   inline
                 />
+                <p className="text-xs text-[#8a7461] dark:text-slate-400 leading-relaxed -mt-2">
+                  اگر پریودت ماه قبل بوده، با دکمه «قبل» بالای تقویم به ماه گذشته برو.
+                </p>
 
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-bold text-[#5c4a3e] dark:text-slate-300">طول چرخه‌ام را نمی‌دانم</span>

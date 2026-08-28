@@ -94,9 +94,10 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
           type="button"
           onClick={goNext}
           aria-label="ماه بعد"
-          className={`icon-only rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ${compact ? 'p-1' : 'p-2'}`}
+          className={`icon-only flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-100 dark:active:bg-slate-700 ${compact ? 'p-1' : 'py-2 px-2.5'}`}
         >
           <ChevronLeft className={compact ? 'w-3.5 h-3.5' : 'w-5 h-5'} />
+          {!compact && <span className="text-xs font-bold">بعد</span>}
         </button>
 
         <span className={`font-black text-slate-800 dark:text-white ${compact ? 'text-[11px]' : 'text-sm'}`}>
@@ -107,8 +108,9 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
           type="button"
           onClick={goPrevious}
           aria-label="ماه قبل"
-          className={`icon-only rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ${compact ? 'p-1' : 'p-2'}`}
+          className={`icon-only flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-100 dark:active:bg-slate-700 ${compact ? 'p-1' : 'py-2 px-2.5'}`}
         >
+          {!compact && <span className="text-xs font-bold">قبل</span>}
           <ChevronRight className={compact ? 'w-3.5 h-3.5' : 'w-5 h-5'} />
         </button>
       </div>

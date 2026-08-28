@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { BookOpen, Check, ChevronDown, Lock, Sparkles, X } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, Layers, Lock, Sparkles, X } from 'lucide-react';
 import {
   GuideLevel,
   GuideTopic,
   findGuideTopicById,
   guideTopicsForLevel,
 } from '../../services/content/guideContent';
+import { findIngredientById } from '../../services/content/ingredients';
+import { CATEGORY_LABELS } from '../products/ProductShelf';
 import {
   LEVEL_COMPLETION_MESSAGES,
   getGuideTier,
@@ -245,6 +247,32 @@ const TopicModal: React.FC<{ topic: GuideTopic; onClose: () => void }> = ({ topi
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {(() => {
+          const ingredient = topic.ingredientId ? findIngredientById(topic.ingredientId) : undefined;
+          if (!ingredient?.commonCategoryIds || ingredient.commonCategoryIds.length === 0) return null;
+          return (
+            <div className="mt-4 space-y-1.5">
+              <h4 className="text-xs font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                <Layers className="w-3.5 h-3.5" />
+                معمولاً در چه محصولاتی هست:
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {ingredient.commonCategoryIds.map((categoryId) => (
+                  <span
+                    key={categoryId}
+                    className="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 text-xs font-bold border border-indigo-200 dark:border-indigo-900"
+                  >
+                    {CATEGORY_LABELS[categoryId]}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                این فهرست بر اساس فرمولاسیون رایج این ماده است، نه تضمین برای یک محصول خاص؛ برندهای مختلف می‌توانند فرمول متفاوتی داشته باشند.
+              </p>
+            </div>
+          );
+        })()}
 
         <div className="mt-4 space-y-3">
           {topic.sectionsFa.map((section, index) => (

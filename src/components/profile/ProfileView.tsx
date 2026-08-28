@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import {
   User as UserIcon,
   Camera,
@@ -30,6 +30,13 @@ interface ProfileViewProps {
   onUpdateState: (state: UserState) => void;
   /** آخرین نتیجه واقعیِ تلاش برای زمان‌بندی اعلان‌ها (نه صرفاً مقدار تنظیمات). */
   notificationStatus?: NotificationScheduleResult | null;
+  /** هر بار که «تغییر ذخیره‌نشده دارد یا نه» عوض شود صدا زده می‌شود، تا App.tsx بتواند قبل از خروج از این صفحه هشدار بدهد. */
+  onDirtyChange?: (isDirty: boolean) => void;
+}
+
+/** با ref گرفته می‌شود تا App.tsx بتواند از بیرون (مثلاً از دیالوگ «ذخیره شود؟») دستور ذخیره بدهد. */
+export interface ProfileViewHandle {
+  save: () => void;
 }
 
 const SKIN_TYPE_LABELS: Record<SkinType, string> = {
@@ -105,7 +112,7 @@ const Toggle: React.FC<{ labelFa: string; value: boolean; onChange: (value: bool
  * قفل PIN، کنترل دیده شدن بخش چرخه و متن خنطی اعلان‌ها.
  * حذف شد: XP و سطح که هیچ منطقی نداشتند.
  */
-export const ProfileView: React.FC<ProfileViewProps> = ({ userState, onUpdateState, notificationStatus }) => {
+export const ProfileView = React.forwardRef<ProfileViewHandle, ProfileViewProps>(({ userState, onUpdateState, notificationStatus, onDirtyChange }, ref) => {
   const [draft, setDraft] = useState<UserState>(userState);
   const [savedMessage, setSavedMessage] = useState(false);
   const [testNotificationState, setTestNotificationState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
@@ -114,8 +121,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ userState, onUpdateSta
     onUpdateState(draft);
     LocalDB.saveUserState(draft);
     setSavedMessage(true);
+    onDirtyChange?.(false);
     setTimeout(() => setSavedMessage(false), 2500);
   };
+
+  // هر تغییری در draft که با userState فرق کند یعنی «ذخیره‌نشده» — به App.tsx
+  // خبر می‌دهیم تا اگر کاربر بخواهد از این صفحه خارج شود، قبلش بپرسد.
+  useEffect(() => {
+    onDirtyChange?.(JSON.stringify(draft) !== JSON.stringify(userState));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, userState]);
+
+  useImperativeHandle(ref, () => ({ save }));
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -638,4 +655,5 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ userState, onUpdateSta
       </p>
     </div>
   );
-};
+});
+ProfileView.displayName = 'ProfileView';

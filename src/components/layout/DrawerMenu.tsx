@@ -77,7 +77,7 @@ export const DrawerMenu: React.FC<Props> = ({ isOpen, onClose, userState, cycleV
           <span className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-rose-500 text-white shadow-md ring-2 ring-[#fffdfb] dark:ring-slate-900"><Camera className="w-3 h-3" /></span>
         </button>
 
-        <div role="button" tabIndex={0} onClick={() => goSection('profile')} onKeyDown={(event) => { if (event.key === 'Enter') goSection('profile'); }} className="flex-1 min-w-0 flex flex-col justify-end gap-1 items-start text-right cursor-pointer py-0.5">
+        <div role="button" tabIndex={0} onClick={() => goSection('profile')} onKeyDown={(event) => { if (event.key === 'Enter') goSection('profile'); }} className="flex-1 min-w-0 h-16 flex flex-col justify-center gap-0.5 items-start text-right cursor-pointer">
           <p className="text-[12px] leading-tight text-slate-500 dark:text-slate-400">روز بخیر 🌹</p>
           <h2 className="text-[17px] font-black text-[#17263b] dark:text-white truncate leading-tight w-full">{userState.profile.name || 'کاربر رزا'}</h2>
           <div onClick={(event) => event.stopPropagation()}><GuideBadge onClick={() => goSection('guide')} /></div>

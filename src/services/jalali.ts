@@ -34,64 +34,110 @@ export function toEnglishDigits(value: string): string {
 }
 
 /* -------------------------- تبدیل تقویم -------------------------- */
+// پیاده‌سازی الگوریتم استاندارد و کاملاً تست‌شده jalaali (بر پایه‌ی جدول
+// دقیق سال‌های کبیسه، نه یک فرمول تقریبی).
+//
+// باگ نسخه قبل: فرمول قبلی (closed-form بدون جدول کبیسه) برای بیشتر
+// تاریخ‌ها درست بود، اما در سه‌ماهه‌ی پایانی هر سال کبیسه‌ی جلالی (مثلاً
+// دی تا اسفند ۱۴۰۳ که با دسامبر ۲۰۲۴ تا مارس ۲۰۲۵ میلادی همپوشانی دارد)
+// دقیقاً یک روز اشتباه محاسبه می‌کرد — یعنی تبدیل رفت‌وبرگشت (میلادی←جلالی←میلادی)
+// یک روز جابه‌جا می‌شد. چون این فقط در بخشی از سال‌های کبیسه رخ می‌داد (بعدی:
+// ۱۴۰۸ ≈ اسفند ۱۴۰۸/زمستان ۱۴۲۹–۳۰ خورشیدی)، در تست‌های عادی دیده نمی‌شد.
 
-export function gregorianToJalali(gy: number, gm: number, gd: number): { jy: number; jm: number; jd: number } {
-  const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-  let jy = gy <= 1600 ? 0 : 979;
-  let year = gy - (gy <= 1600 ? 621 : 1600);
-  const leapRef = gm > 2 ? year + 1 : year;
-  let days =
-    365 * year +
-    Math.floor((leapRef + 3) / 4) -
-    Math.floor((leapRef + 99) / 100) +
-    Math.floor((leapRef + 399) / 400) -
-    80 +
-    gd +
-    monthDays[gm - 1];
-  jy += 33 * Math.floor(days / 12053);
-  days %= 12053;
-  jy += 4 * Math.floor(days / 1461);
-  days %= 1461;
-  jy += Math.floor((days - 1) / 365);
-  if (days > 0) days = (days - 1) % 365;
-  const jm = days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
-  const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+function jdiv(a: number, b: number): number {
+  return Math.trunc(a / b);
+}
+function jmod(a: number, b: number): number {
+  return a - Math.trunc(a / b) * b;
+}
+
+/** نقاط شکست چرخه‌ی کبیسه‌ی جلالی (الگوریتم استاندارد jalaali، معتبر تا سال ۳۱۷۷). */
+const JALALI_BREAKS = [
+  -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178,
+];
+
+function jalCal(jy: number): { leap: number; gy: number; march: number } {
+  const bl = JALALI_BREAKS.length;
+  const gy = jy + 621;
+  let leapJ = -14;
+  let jp = JALALI_BREAKS[0];
+  let jm = jp;
+  let jump = 0;
+  for (let i = 1; i < bl; i += 1) {
+    jm = JALALI_BREAKS[i];
+    jump = jm - jp;
+    if (jy < jm) break;
+    leapJ = leapJ + jdiv(jump, 33) * 8 + jdiv(jmod(jump, 33), 4);
+    jp = jm;
+  }
+  let n = jy - jp;
+  leapJ = leapJ + jdiv(n, 33) * 8 + jdiv(jmod(n, 33) + 3, 4);
+  if (jmod(jump, 33) === 4 && jump - n === 4) leapJ += 1;
+  const leapG = jdiv(gy, 4) - jdiv((jdiv(gy, 100) + 1) * 3, 4) - 150;
+  const march = 20 + leapJ - leapG;
+  if (jump - n < 6) n = n - jump + jdiv(jump + 4, 33) * 33;
+  let leap = jmod(jmod(n + 1, 33) - 1, 4);
+  if (leap === -1) leap = 4;
+  return { leap, gy, march };
+}
+
+/** تاریخ میلادی → شماره روز ژولینی (JDN). */
+function g2d(gy: number, gm: number, gd: number): number {
+  let d =
+    jdiv((gy + jdiv(gm - 8, 6) + 100100) * 1461, 4) + jdiv(153 * jmod(gm + 9, 12) + 2, 5) + gd - 34840408;
+  d = d - jdiv(jdiv(gy + 100100 + jdiv(gm - 8, 6), 100) * 3, 4) + 752;
+  return d;
+}
+
+/** شماره روز ژولینی (JDN) → تاریخ میلادی. */
+function d2g(jdn: number): { gy: number; gm: number; gd: number } {
+  let j = 4 * jdn + 139361631;
+  j = j + jdiv(jdiv(4 * jdn + 183187720, 146097) * 3, 4) * 4 - 3908;
+  const i = jdiv(jmod(j, 1461), 4) * 5 + 308;
+  const gd = jdiv(jmod(i, 153), 5) + 1;
+  const gm = jmod(jdiv(i, 153), 12) + 1;
+  const gy = jdiv(j, 1461) - 100100 + jdiv(8 - gm, 6);
+  return { gy, gm, gd };
+}
+
+/** تاریخ جلالی → شماره روز ژولینی (JDN). */
+function j2d(jy: number, jm: number, jd: number): number {
+  const r = jalCal(jy);
+  return g2d(r.gy, 3, r.march) + (jm - 1) * 31 - jdiv(jm, 7) * (jm - 7) + jd - 1;
+}
+
+/** شماره روز ژولینی (JDN) → تاریخ جلالی. */
+function d2j(jdn: number): { jy: number; jm: number; jd: number } {
+  const gy = d2g(jdn).gy;
+  let jy = gy - 621;
+  const r = jalCal(jy);
+  const jdn1f = g2d(r.gy, 3, r.march);
+  let k = jdn - jdn1f;
+  let jm: number;
+  let jd: number;
+  if (k >= 0) {
+    if (k <= 185) {
+      jm = 1 + jdiv(k, 31);
+      jd = jmod(k, 31) + 1;
+      return { jy, jm, jd };
+    }
+    k -= 186;
+  } else {
+    jy -= 1;
+    k += 179;
+    if (r.leap === 1) k += 1;
+  }
+  jm = 7 + jdiv(k, 30);
+  jd = jmod(k, 30) + 1;
   return { jy, jm, jd };
 }
 
+export function gregorianToJalali(gy: number, gm: number, gd: number): { jy: number; jm: number; jd: number } {
+  return d2j(g2d(gy, gm, gd));
+}
+
 export function jalaliToGregorian(jy: number, jm: number, jd: number): { gy: number; gm: number; gd: number } {
-  let gy = jy <= 979 ? 621 : 1600;
-  const year = jy - (jy <= 979 ? 0 : 979);
-  let days =
-    365 * year +
-    Math.floor(year / 33) * 8 +
-    Math.floor(((year % 33) + 3) / 4) +
-    78 +
-    jd +
-    (jm < 7 ? (jm - 1) * 31 : (jm - 7) * 30 + 186);
-  gy += 400 * Math.floor(days / 146097);
-  days %= 146097;
-  if (days > 36524) {
-    days -= 1;
-    gy += 100 * Math.floor(days / 36524);
-    days %= 36524;
-    if (days >= 365) days += 1;
-  }
-  gy += 4 * Math.floor(days / 1461);
-  days %= 1461;
-  if (days > 365) {
-    gy += Math.floor((days - 1) / 365);
-    days = (days - 1) % 365;
-  }
-  let gd = days + 1;
-  const isLeap = (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0;
-  const monthLengths = [0, 31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  let gm = 0;
-  for (gm = 1; gm <= 12; gm += 1) {
-    if (gd <= monthLengths[gm]) break;
-    gd -= monthLengths[gm];
-  }
-  return { gy, gm, gd };
+  return d2g(j2d(jy, jm, jd));
 }
 
 /** تعداد روزهای یک ماه شمسی. */

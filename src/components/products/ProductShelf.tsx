@@ -11,6 +11,7 @@ import { addDays, formatJalaliDayMonth, getDaysDifference, getTodayIsoDate, toPe
 import { JalaliDatePicker } from '../common/JalaliDatePicker';
 import { EmptyState } from '../common/EmptyState';
 import { PrettySelect } from '../common/PrettySelect';
+import { BrandAutocomplete } from '../common/BrandAutocomplete';
 
 interface ProductShelfProps {
   products: Product[];
@@ -42,7 +43,6 @@ export const CATEGORY_LABELS: Record<ProductCategory, string> = {
  */
 export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdateProducts, userState }) => {
   const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState('');
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState<ProductCategory>('serum');
   const [ingredientIds, setIngredientIds] = useState<string[]>([]);
@@ -61,10 +61,13 @@ export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdatePr
   });
 
   const addProduct = () => {
-    if (!name.trim()) return;
     const product: Product = {
       id: createId('prod'),
-      name: name.trim(),
+      // فیلد «نام محصول» عمداً از فرم حذف شده: کاربر فقط نوع محصول و برند را
+      // انتخاب می‌کند، و نام از روی برچسب فارسی دسته ساخته می‌شود (مثلاً
+      // «سینره — مرطوب‌کننده»). جای خالی برای یک اسم اختیاری/تجاری وسوسه‌انگیز
+      // بود ولی اکثر کاربرها فقط نوعش را می‌دانند، نه اسم دقیق محصول.
+      name: CATEGORY_LABELS[category],
       brand: brand.trim() || 'نامشخص',
       category,
       ingredientIds,
@@ -77,7 +80,6 @@ export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdatePr
       updatedAt: new Date().toISOString(),
     };
     onUpdateProducts([product, ...products]);
-    setName('');
     setBrand('');
     setIngredientIds([]);
     setOpenedDate('');
@@ -156,9 +158,9 @@ export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdatePr
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h4 className="font-black text-sm text-slate-800 dark:text-white">{product.name}</h4>
+                  <h4 className="font-black text-sm text-slate-800 dark:text-white truncate">{product.brand}</h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {product.brand} · {CATEGORY_LABELS[product.category]}
+                    {CATEGORY_LABELS[product.category]}
                   </p>
                 </div>
                 <button
@@ -217,20 +219,14 @@ export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdatePr
               </button>
             </div>
 
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="نام محصول"
-              className="w-full py-3 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold"
-            />
-            <input
-              value={brand}
-              onChange={(event) => setBrand(event.target.value)}
-              placeholder="برند (مانند لافارر، سینره، سی‌گل)"
-              className="w-full py-3 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold"
-            />
-
             <PrettySelect label="نوع محصول" value={category} onChange={(value) => setCategory(value as ProductCategory)} options={Object.entries(CATEGORY_LABELS).map(([key, label]) => ({ value: key, label }))} />
+
+            <BrandAutocomplete
+              labelFa="برند"
+              value={brand}
+              onChange={setBrand}
+              placeholder="مثلاً سینره، لاروش‌پوزای، مای"
+            />
 
             <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
               <button type="button" onClick={() => setIngredientsOpen((value) => !value)} className="w-full min-h-[58px] px-4 py-3 flex items-center justify-between gap-3 text-right bg-slate-50 dark:bg-slate-800">
@@ -296,8 +292,7 @@ export const ProductShelf: React.FC<ProductShelfProps> = ({ products, onUpdatePr
 
             <button
               onClick={addProduct}
-              disabled={!name.trim()}
-              className="w-full py-3.5 rounded-2xl bg-[#8e5241] disabled:opacity-40 text-white font-bold text-sm"
+              className="w-full py-3.5 rounded-2xl bg-[#8e5241] text-white font-bold text-sm"
             >
               ذخیره
             </button>

@@ -8,11 +8,13 @@ import {
   Scissors,
   CalendarClock,
   ChevronLeft,
+  ChevronDown,
+  HelpCircle,
   AlertTriangle,
   Moon as MoonIcon,
   X,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { DailyTrackerEntry, Product, UserState, WeatherData } from '../../types';
 import { buildDailyGuidance, ingredientNamesFa } from '../../services/recommendationEngine';
 import { SEVERITY_HINT_FA, SEVERITY_LABEL_FA, SEVERITY_STYLE } from '../../services/advice/severity';
@@ -100,6 +102,124 @@ const DismissButton: React.FC<{ onClick: () => void; className?: string }> = ({ 
   </button>
 );
 
+/**
+ * آکاردئون بخش‌های «ترکیبات امروز» و «امروز چه چیزی روی پوستت دیدی؟».
+ *
+ * قبلاً همهٔ این محتوا (پیشنهادها، هشدارها، نکته‌ها) هم‌زمان روی صفحه
+ * باز بود و کارت خیلی شلوغ می‌شد. حالا هر بخش پیش‌فرض بسته است و کاربر
+ * خودش با تپ روی هدر بازش می‌کند؛ نوار رنگی کنار عنوان و بج شمارشگر
+ * کمک می‌کند حتی بسته هم بشود فهمید داخلش چند نکته هست.
+ */
+const SectionAccordion: React.FC<{
+  title: string;
+  count?: number;
+  accentClassName: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}> = ({ title, count, accentClassName, isOpen, onToggle, children }) => (
+  <div className="rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <button
+      onClick={onToggle}
+      aria-expanded={isOpen}
+      className="w-full px-3.5 py-3 flex items-center justify-between gap-2 text-right bg-slate-50/70 dark:bg-slate-800/40"
+    >
+      <span className="flex items-center gap-2 min-w-0">
+        <span className={`w-1.5 h-5 rounded-full shrink-0 ${accentClassName}`} />
+        <span className="text-xs font-black text-slate-800 dark:text-white truncate">{title}</span>
+        {typeof count === 'number' && count > 0 && (
+          <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-700/70 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+            {toPersianDigits(count)}
+          </span>
+        )}
+      </span>
+      <ChevronDown
+        className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+      />
+    </button>
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <div className="px-3.5 pb-3.5 pt-1 space-y-2.5">{children}</div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+
+/** اولین کلاس تیلویند با این پیشوند را از یک رشتهٔ className بیرون می‌کشد. */
+function pickClass(className: string, prefix: string): string {
+  return className.split(' ').find((token) => token.startsWith(prefix)) || '';
+}
+
+/**
+ * دکمهٔ گرد «؟» — جایگزین متن‌های توضیحی بلندی که قبلاً همیشه زیر اسم
+ * ماده چاپ می‌شدند (مثلاً پاراگراف ویتامین C). با تپ، حباب توضیح باز می‌شود.
+ */
+const InfoBubbleButton: React.FC<{
+  id: string;
+  openId: string | null;
+  onToggle: (id: string) => void;
+  toneClassName: string;
+}> = ({ id, openId, onToggle, toneClassName }) => (
+  <button
+    onClick={() => onToggle(id)}
+    aria-label="توضیح بیشتر"
+    aria-expanded={openId === id}
+    className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black leading-none transition-transform active:scale-90 ${toneClassName}`}
+  >
+    ؟
+  </button>
+);
+
+/**
+ * حباب توضیح. عمداً یک بلوک inline زیر همان ردیف است، نه tooltip شناور
+ * روی مختصات مطلق — روی موبایل با اسکرول، تولتیپ شناور جایش خراب می‌شود؛
+ * این یکی همیشه دقیقاً زیر دکمه‌ای که بازش کرده می‌نشیند.
+ */
+const InfoBubble: React.FC<{ show: boolean; bubbleClassName: string; children: React.ReactNode }> = ({
+  show,
+  bubbleClassName,
+  children,
+}) => {
+  const arrowClassName = `${pickClass(bubbleClassName, 'bg-')} ${pickClass(bubbleClassName, 'dark:bg-')}`;
+  return (
+    <AnimatePresence initial={false}>
+      {show && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <div className={`relative mt-2 px-3 py-2 rounded-xl text-[11px] leading-relaxed font-medium space-y-1.5 ${bubbleClassName}`}>
+            <span className={`absolute -top-1 right-4 w-2 h-2 rotate-45 ${arrowClassName}`} />
+            {children}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+/** دکمهٔ «ببین چرا» با ظاهر پیل به‌جای لینک زیرخط‌دار ساده. */
+const SeeWhyPill: React.FC<{ onClick: () => void; className?: string }> = ({ onClick, className = '' }) => (
+  <button
+    onClick={onClick}
+    className={`shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black ${className}`}
+  >
+    <HelpCircle className="w-3 h-3" />
+    ببین چرا
+  </button>
+);
+
 const DISMISS_KEYS = {
   lifestyle: 'roza_dismissed_lifestyle_insight',
   procedure: 'roza_dismissed_procedure_insight',
@@ -169,9 +289,34 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   };
   const visibleSafetyWarnings = guidance.safetyWarningsFa.filter((warning) => !dismissed.safety.includes(warning));
 
+  /* آکاردئون‌های کارت «ترکیبات امروز» + بخش «امروز چه چیزی روی پوستت دیدی؟»
+     — هر کدام مستقل باز/بسته می‌شود، پیش‌فرض همه بسته. */
+  const [openSection, setOpenSection] = useState({
+    recommended: false,
+    caution: false,
+    info: false,
+    skinSignals: false,
+  });
+  const toggleSection = (key: keyof typeof openSection) =>
+    setOpenSection((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  /* فقط یک حباب توضیح («؟») در کل کارت هم‌زمان باز است، تا صفحه شلوغ نشود. */
+  const [openInfoId, setOpenInfoId] = useState<string | null>(null);
+  const toggleInfo = (id: string) => setOpenInfoId((prev) => (prev === id ? null : id));
+
   const upcoming = getUpcomingAppointments(2);
   const providers = LocalDB.getProviders();
   const waterTarget = userState.lifestyle.waterTargetGlasses || 8;
+
+  /*
+   * بخش «با احتیاط» قبلاً یک متن ثابت تکراری («این ماده در محصولات
+   * ثبت‌شدهٔ تو نیست؛ این مورد فقط آموزشی است.») روی هر کارتی می‌آورد که
+   * ماده‌اش را نداشتی — و چون بیشتر موادِ این فهرست معمولاً در قفسهٔ کاربر
+   * نیستند، همان یک جمله چند بار پشت سر هم تکرار می‌شد. حالا فقط مواد
+   * واقعی قفسه کارت کامل می‌گیرند؛ بقیه یک‌جا و فشرده لیست می‌شوند.
+   */
+  const shelfCautionAdvice = guidance.ingredientAdvice.filter((advice) => advice.inUserShelf);
+  const educationalCautionAdvice = guidance.ingredientAdvice.filter((advice) => !advice.inUserShelf);
 
   const addWater = () => onUpdateDailyLog({ ...todayLog, waterGlasses: todayLog.waterGlasses + 1 });
   const setSkinScore = (score: number) => onUpdateDailyLog({ ...todayLog, skinStatusScore: score });
@@ -340,7 +485,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
       )}
 
-      {/* ترکیبات امروز */}
+      {/* ترکیبات امروز — سه آکاردئون مستقل، پیش‌فرض بسته */}
       <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-rose-100 dark:border-slate-800 space-y-3">
         <h4 className="text-sm font-black text-slate-800 dark:text-white">ترکیبات امروز</h4>
 
@@ -352,160 +497,218 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             قواعد چرخه/سن/علائم توصیهٔ SUGGESTION تولید می‌کنند — یک کارت
             جداگانه با همان نام پایین‌تر؛ یعنی یک ماده دو بار در یک کارت.
             حالا توصیه‌های «استفاده کن» کارت جدا نمی‌گیرند و دلیلشان روی
-            همین چیپ نشسته است.
+            همین چیپ نشسته است — و به‌جای چاپ کامل توضیح، پشت یک دکمهٔ «؟»
+            می‌رود تا فهرست شلوغ نشود.
           */}
           {guidance.recommendedIngredientIds.length > 0 && (
-            <div>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block mb-1.5">
-                پیشنهاد می‌شود
-              </span>
-              <div className="flex flex-wrap gap-1.5">
+            <SectionAccordion
+              title="پیشنهاد می‌شود"
+              count={guidance.recommendedIngredientIds.length}
+              accentClassName="bg-emerald-400"
+              isOpen={openSection.recommended}
+              onToggle={() => toggleSection('recommended')}
+            >
+              <div className="flex flex-wrap gap-1.5 items-start">
                 {guidance.recommendedIngredientIds.map((id) => {
                   const whyFa = guidance.recommendedReasonById[id];
+                  const infoKey = `rec-${id}`;
                   return (
-                    <span
-                      key={id}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold"
-                    >
-                      {ingredientNameWithForm(id, id)}
-                      {whyFa && <span className="block font-normal opacity-80 leading-relaxed pt-0.5">{whyFa}</span>}
-                    </span>
+                    <div key={id}>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
+                        <span className="text-xs font-bold">{ingredientNameWithForm(id, id)}</span>
+                        {whyFa && (
+                          <InfoBubbleButton
+                            id={infoKey}
+                            openId={openInfoId}
+                            onToggle={toggleInfo}
+                            toneClassName="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300"
+                          />
+                        )}
+                      </div>
+                      {whyFa && (
+                        <InfoBubble
+                          show={openInfoId === infoKey}
+                          bubbleClassName="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-200"
+                        >
+                          <p>{whyFa}</p>
+                        </InfoBubble>
+                      )}
+                    </div>
                   );
                 })}
               </div>
-            </div>
+
+              {/* ماده‌هایی که یک قاعده پیشنهاد کرده بود ولی قاعدهٔ دیگری محدودشان
+                  می‌کند. قبلاً همین‌ها هم‌زمان چیپ سبز و چیپ نارنجی می‌گرفتند. */}
+              {guidance.withheldIngredientIds.length > 0 && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1">
+                  {ingredientNamesFa(guidance.withheldIngredientIds).join('، ')} برای پوست تو معمولاً مفیدند، ولی
+                  امروز به‌خاطر موارد بخش «با احتیاط» از فهرست پیشنهاد بیرون ماندند.
+                </p>
+              )}
+            </SectionAccordion>
           )}
 
           {/*
-            کارت کامل توصیه.
-
-            قبلاً هر توصیه فقط یک چیپ با نام ماده بود و reasonFa داخل
-            attribute title می‌رفت؛ روی اپ لمسی Capacitor آن tooltip هرگز
-            ظاهر نمی‌شد، یعنی «چرا رزا امروز این را گفت» عملاً نامرئی بود.
-            headlineFa، triggersFa، productNamesFa، untilIso و educationalOnly
-            هم ساخته می‌شدند و در هیچ کامپوننتی مصرف نمی‌شدند — نتیجه‌اش همان
-            چیزی بود که کامنت types.ts ممنوع کرده بود: کاربر «امروز از X
-            استفاده نکن» می‌دید برای ماده‌ای که ندارد.
+            بخش «با احتیاط» — دو زیر بخش:
+            ۱) موادی که واقعاً در محصولات کاربرند: کارت کامل (headline،
+               دلیل، تا کِی، دامنه، تریگرها، ببین چرا).
+            ۲) موادی که در محصولات کاربر نیستند: به‌جای تکرار همان جملهٔ
+               ثابت روی هر کارت («این ماده در محصولات ثبت‌شدهٔ تو نیست؛
+               این مورد فقط آموزشی است»)، یک‌جا و فشرده لیست می‌شوند و
+               دلیل هرکدام پشت دکمهٔ «؟» می‌رود.
           */}
-          {guidance.ingredientAdvice.length > 0 && (
-            <div className="space-y-2">
-              {(['PROFESSIONAL_INSTRUCTION', 'IMPORTANT', 'CAUTION', 'SUGGESTION', 'INFO'] as const)
-                .map((severity) => ({
-                  severity,
-                  items: guidance.ingredientAdvice.filter((advice) => advice.severity === severity),
-                }))
-                .filter((group) => group.items.length > 0)
-                .map((group) => (
-                  <div key={group.severity} className="space-y-1.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 block">
-                      {SEVERITY_LABEL_FA[group.severity]}
-                      <span className="font-normal opacity-70"> — {SEVERITY_HINT_FA[group.severity]}</span>
-                    </span>
+          {(guidance.ingredientAdvice.length > 0 || guidance.avoidIngredientIds.length > 0) && (
+            <SectionAccordion
+              title="با احتیاط"
+              count={guidance.ingredientAdvice.length || guidance.avoidIngredientIds.length}
+              accentClassName="bg-amber-400"
+              isOpen={openSection.caution}
+              onToggle={() => toggleSection('caution')}
+            >
+              {shelfCautionAdvice.length > 0 && (
+                <div className="space-y-2">
+                  {(['PROFESSIONAL_INSTRUCTION', 'IMPORTANT', 'CAUTION'] as const)
+                    .map((severity) => ({
+                      severity,
+                      items: shelfCautionAdvice.filter((advice) => advice.severity === severity),
+                    }))
+                    .filter((group) => group.items.length > 0)
+                    .map((group) => (
+                      <div key={group.severity} className="space-y-1.5">
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400 block">
+                          {SEVERITY_LABEL_FA[group.severity]}
+                          <span className="font-normal opacity-70"> — {SEVERITY_HINT_FA[group.severity]}</span>
+                        </span>
 
-                    <div className="space-y-1.5">
-                      {group.items.map((advice) => {
-                        const whyTopicId = findWhyTopicForIngredientAdvice({
-                          ingredientId: advice.ingredientId,
-                          source: advice.source,
-                        })?.id;
-                        return (
-                          <div
-                            key={advice.ruleId}
-                            className={`px-3 py-2.5 rounded-2xl border text-xs space-y-1.5 ${SEVERITY_STYLE[advice.severity]}`}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="font-black leading-relaxed">{advice.headlineFa}</span>
-                              {whyTopicId && onOpenGuideTopic && (
-                                <button
-                                  onClick={() => onOpenGuideTopic(whyTopicId)}
-                                  className="shrink-0 text-[10px] font-black underline underline-offset-2"
-                                >
-                                  ببین چرا
-                                </button>
-                              )}
-                            </div>
+                        <div className="space-y-1.5">
+                          {group.items.map((advice) => {
+                            const whyTopicId = findWhyTopicForIngredientAdvice({
+                              ingredientId: advice.ingredientId,
+                              source: advice.source,
+                            })?.id;
+                            return (
+                              <div
+                                key={advice.ruleId}
+                                className={`px-3 py-2.5 rounded-2xl border text-xs space-y-1.5 ${SEVERITY_STYLE[advice.severity]}`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <span className="font-black leading-relaxed">{advice.headlineFa}</span>
+                                  {whyTopicId && onOpenGuideTopic && (
+                                    <SeeWhyPill
+                                      onClick={() => onOpenGuideTopic(whyTopicId)}
+                                      className="bg-white/70 dark:bg-slate-900/40"
+                                    />
+                                  )}
+                                </div>
 
-                            {/* دلیل، حالا واقعاً روی صفحه است نه داخل tooltip */}
-                            {advice.reasonFa && (
-                              <p className="leading-relaxed opacity-90">{advice.reasonFa}</p>
-                            )}
+                                {/* دلیل، حالا واقعاً روی صفحه است نه داخل tooltip */}
+                                {advice.reasonFa && (
+                                  <p className="leading-relaxed opacity-90">{advice.reasonFa}</p>
+                                )}
 
-                            {/* «تا کِی» — قبلاً در تایپ بود و هرگز به کاربر نمی‌رسید */}
-                            {advice.untilIso && (
-                              <p className="font-bold opacity-90">
-                                تا {formatJalaliDayMonth(advice.untilIso)}
-                              </p>
-                            )}
+                                {/* «تا کِی» — قبلاً در تایپ بود و هرگز به کاربر نمی‌رسید */}
+                                {advice.untilIso && (
+                                  <p className="font-bold opacity-90">
+                                    تا {formatJalaliDayMonth(advice.untilIso)}
+                                  </p>
+                                )}
 
-                            {advice.scopeFa && (
-                              <p className="font-bold opacity-90">دامنه: {advice.scopeFa}</p>
-                            )}
+                                {advice.scopeFa && (
+                                  <p className="font-bold opacity-90">دامنه: {advice.scopeFa}</p>
+                                )}
 
-                            {/* ماده در قفسه نیست: صریح می‌گوییم، تا شکل دستور نگیرد */}
-                            {advice.educationalOnly && (
-                              <p className="opacity-75">
-                                این ماده در محصولات ثبت‌شدهٔ تو نیست؛ این مورد فقط آموزشی است.
-                              </p>
-                            )}
-
-                            {advice.triggersFa.length > 0 && (
-                              <div className="flex flex-wrap gap-1 pt-0.5">
-                                {advice.triggersFa.slice(0, 4).map((trigger) => (
-                                  <span
-                                    key={trigger}
-                                    className="px-2 py-0.5 rounded-lg bg-white/60 dark:bg-slate-900/40 text-[10px] font-bold"
-                                  >
-                                    {trigger}
-                                  </span>
-                                ))}
+                                {advice.triggersFa.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-0.5">
+                                    {advice.triggersFa.slice(0, 4).map((trigger) => (
+                                      <span
+                                        key={trigger}
+                                        className="px-2 py-0.5 rounded-lg bg-white/60 dark:bg-slate-900/40 text-[10px] font-bold"
+                                      >
+                                        {trigger}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {educationalCautionAdvice.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block leading-relaxed">
+                    این‌ها فعلاً در محصولات ثبت‌شدهٔ تو نیستند؛ فقط خوب است بدانی برای پوست تو مناسب نیستند:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 items-start">
+                    {educationalCautionAdvice.map((advice) => {
+                      const whyTopicId = findWhyTopicForIngredientAdvice({
+                        ingredientId: advice.ingredientId,
+                        source: advice.source,
+                      })?.id;
+                      const infoKey = `edu-${advice.ruleId}`;
+                      return (
+                        <div key={advice.ruleId}>
+                          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                            <span className="text-xs font-bold">{advice.ingredientNameFa}</span>
+                            <InfoBubbleButton
+                              id={infoKey}
+                              openId={openInfoId}
+                              onToggle={toggleInfo}
+                              toneClassName="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                            />
                           </div>
-                        );
-                      })}
-                    </div>
+                          <InfoBubble show={openInfoId === infoKey} bubbleClassName={SEVERITY_STYLE[advice.severity]}>
+                            {advice.reasonFa && <p>{advice.reasonFa}</p>}
+                            {whyTopicId && onOpenGuideTopic && (
+                              <SeeWhyPill
+                                onClick={() => onOpenGuideTopic(whyTopicId)}
+                                className="bg-white/70 dark:bg-slate-900/40"
+                              />
+                            )}
+                          </InfoBubble>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-            </div>
+                </div>
+              )}
+
+              {guidance.ingredientAdvice.length === 0 && guidance.avoidIngredientIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {guidance.avoidIngredientIds.map((id) => (
+                    <span
+                      key={id}
+                      className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-xs font-bold"
+                    >
+                      {ingredientNameWithForm(id, id)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </SectionAccordion>
           )}
 
           {/* نکته‌های فقط-اطلاعی: فاز چرخه به‌تنهایی دلیل کافی برای منع یک
               اکتیو نیست، پس اینها ممنوعیت نیستند و رنگ هشدار هم نمی‌گیرند. */}
           {guidance.ingredientNotes.length > 0 && (
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">فقط خوب است بدانی</span>
+            <SectionAccordion
+              title="فقط خوب است بدانی"
+              count={guidance.ingredientNotes.length}
+              accentClassName="bg-slate-300 dark:bg-slate-600"
+              isOpen={openSection.info}
+              onToggle={() => toggleSection('info')}
+            >
               {guidance.ingredientNotes.map((note) => (
                 <p key={note.ruleId} className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                   <span className="font-bold">{note.ingredientNameFa}:</span> {note.reasonFa}
                 </p>
               ))}
-            </div>
-          )}
-
-          {/* ماده‌هایی که یک قاعده پیشنهاد کرده بود ولی قاعدهٔ دیگری محدودشان
-              می‌کند. قبلاً همین‌ها هم‌زمان چیپ سبز «پیشنهاد می‌شود» و چیپ
-              نارنجی «با احتیاط» می‌گرفتند. */}
-          {guidance.withheldIngredientIds.length > 0 && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              {ingredientNamesFa(guidance.withheldIngredientIds).join('، ')} برای پوست تو معمولاً مفیدند، ولی
-              امروز به‌خاطر موارد بالا از فهرست پیشنهاد بیرون ماندند.
-            </p>
-          )}
-
-          {guidance.ingredientAdvice.length === 0 && guidance.avoidIngredientIds.length > 0 && (
-            <div>
-              <span className="text-xs font-bold text-rose-700 dark:text-rose-400 block mb-1.5">امروز پرهیز کن</span>
-              <div className="flex flex-wrap gap-1.5">
-                {guidance.avoidIngredientIds.map((id) => (
-                  <span
-                    key={id}
-                    className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 text-xs font-bold"
-                  >
-                    {ingredientNameWithForm(id, id)}
-                  </span>
-                ))}
-              </div>
-            </div>
+            </SectionAccordion>
           )}
         </div>
       </div>
@@ -581,10 +784,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           منبع واقعی، فرم ثبت علائم چرخه بود (که کاربران بدون چرخه هرگز
           نمی‌دیدند). حالا نوشته می‌شوند.
         */}
-        <div className="space-y-2.5">
-          <span className="text-sm font-bold text-slate-700 dark:text-slate-300 block">
-            امروز چه چیزی روی پوستت دیدی؟
-          </span>
+        <SectionAccordion
+          title="امروز چه چیزی روی پوستت دیدی؟"
+          accentClassName="bg-rose-400"
+          isOpen={openSection.skinSignals}
+          onToggle={() => toggleSection('skinSignals')}
+        >
           {SKIN_SIGNAL_FIELDS.map((field) => (
             <div key={field.key} className="space-y-1">
               <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{field.labelFa}</span>
@@ -611,7 +816,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {guidance.skinSignals.sourceFa}؛ روتین امروز روی همین تنظیم شد.
             </p>
           )}
-        </div>
+        </SectionAccordion>
       </div>
 
       <Monthly30DayTracker onOpenProgress={() => onNavigateTab('progress')} />

@@ -15,7 +15,7 @@ import { computeStreak } from './services/routineService';
 import { isFeatureEnabled } from './config/appConfig';
 
 import { Header } from './components/layout/Header';
-import { BottomNavigation, NavTab } from './components/layout/BottomNavigation';
+import { BottomNavigation, NavTab, FabAction, FAB_PRODUCT_ICON, FAB_ROUTINE_ICON } from './components/layout/BottomNavigation';
 import { DrawerMenu } from './components/layout/DrawerMenu';
 import { LockScreen } from './components/common/LockScreen';
 import { FeatureTourOverlay, TourKey } from './components/common/FeatureTourOverlay';
@@ -27,7 +27,7 @@ import { KnowledgeCenter } from './components/knowledge/KnowledgeCenter';
 import { SkinLab } from './components/lab/SkinLab';
 import { ProductShelf } from './components/products/ProductShelf';
 import { ProgressTracker } from './components/progress/ProgressTracker';
-import { ProfileView } from './components/profile/ProfileView';
+import { ProfileView, ProfileViewHandle } from './components/profile/ProfileView';
 import { CycleDashboard } from './components/cycle/CycleDashboard';
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
 import { FaceMasksView } from './components/masks/FaceMasksView';
@@ -137,25 +137,78 @@ export default function App() {
   const [knowledgeInitialConditionId, setKnowledgeInitialConditionId] = useState<string | null>(null);
   const handleSearchResultSelect = (result: SearchResult) => {
     setIsSearchOpen(false);
-    if (result.type === 'ingredient') {
-      setLabInitialIngredientId(result.id);
-      setActiveSection('lab');
-    } else if (result.type === 'interaction' && result.interaction) {
-      setLabInitialConflictPair({
-        firstId: result.interaction.firstIngredientId,
-        secondId: result.interaction.secondIngredientId,
-      });
-      setActiveSection('lab');
-    } else if (result.type === 'condition') {
-      setKnowledgeInitialConditionId(result.id);
-      setActiveSection('knowledge');
-    } else if (result.type === 'article') {
-      setKnowledgeInitialArticleId(result.id);
-      setActiveSection('knowledge');
-    } else if (result.type === 'guide') {
-      openGuideTopic(result.id);
+    guardNavigate(() => {
+      if (result.type === 'ingredient') {
+        setLabInitialIngredientId(result.id);
+        setActiveSection('lab');
+      } else if (result.type === 'interaction' && result.interaction) {
+        setLabInitialConflictPair({
+          firstId: result.interaction.firstIngredientId,
+          secondId: result.interaction.secondIngredientId,
+        });
+        setActiveSection('lab');
+      } else if (result.type === 'condition') {
+        setKnowledgeInitialConditionId(result.id);
+        setActiveSection('knowledge');
+      } else if (result.type === 'article') {
+        setKnowledgeInitialArticleId(result.id);
+        setActiveSection('knowledge');
+      } else if (result.type === 'guide') {
+        openGuideTopic(result.id);
+      }
+    });
+  };
+  // اگر کاربر توی «تنظیمات/پروفایل» چیزی عوض کند ولی دکمه «ذخیره تغییرات» را
+  // نزند و بخواهد از صفحه خارج شود (تب پایین، منو، جستجو و ...)، باید قبلش
+  // بپرسیم که تغییرات ذخیره شود یا نه — وگرنه بی‌سروصدا از بین می‌رود.
+  const profileViewRef = React.useRef<ProfileViewHandle>(null);
+  const [isProfileDirty, setIsProfileDirty] = useState(false);
+  const [pendingProfileNav, setPendingProfileNav] = useState<(() => void) | null>(null);
+  // با ref پیاده‌سازی شده (نه یک تابع ساده‌ی هر-رندر) چون چند جای کد این تابع
+  // را در افکت‌هایی با dependency array خالی (مثلاً لمس اعلان، دکمه برگشت
+  // اندروید) صدا می‌زنند؛ اگر خودِ تابع در closure آن افکت‌ها گیر بیفتد، همیشه
+  // مقدار activeSection/isProfileDirty لحظه‌ی mount را می‌بیند نه مقدار تازه.
+  const guardNavigateImpl = React.useRef<(action: () => void) => void>(() => {});
+  guardNavigateImpl.current = (action: () => void) => {
+    if (activeSection === 'profile' && isProfileDirty) {
+      setPendingProfileNav(() => action);
+    } else {
+      action();
     }
   };
+  const guardNavigate = React.useCallback((action: () => void) => guardNavigateImpl.current(action), []);
+
+  // هندلرهای پایدار نوبار پایین — نگاه کن به توضیح React.memo داخل
+  // BottomNavigation.tsx: بدون useCallback، این دو تابع با هر رندر App
+  // (مثلاً هر تپ روی گزینه‌های علائم پوستی که فقط todayLog را عوض می‌کند)
+  // از نو ساخته می‌شدند و memo را بی‌اثر می‌کردند.
+  const handleBottomNavTabChange = React.useCallback((tab: NavTab) => {
+    guardNavigate(() => {
+      setActiveSection(null);
+      setActiveTab(tab);
+      const key = tab as TourKey;
+      setTourKey(localStorage.getItem(`roza_tour_${key}_v1`) === '1' ? null : key);
+    });
+  }, [guardNavigate]);
+  // دو گزینه‌ی Floating Action Menu روی FAB — هرکدام دقیقاً همان مسیری را باز
+  // می‌کند که قبلاً هم وجود داشت (بخش 'products' و بخش 'personalRoutine')؛
+  // فقط ورودی از یک تپ مستقیم به یک منوی دو-گزینه‌ای تبدیل شده، صفحات مقصد
+  // دست‌نخورده‌اند.
+  const fabActions = React.useMemo<FabAction[]>(() => [
+    {
+      key: 'product',
+      labelFa: 'محصول پوستی',
+      icon: FAB_PRODUCT_ICON,
+      onClick: () => guardNavigate(() => setActiveSection('products')),
+    },
+    {
+      key: 'routine',
+      labelFa: 'به روتین پوستی',
+      icon: FAB_ROUTINE_ICON,
+      onClick: () => guardNavigate(() => setActiveSection('personalRoutine')),
+    },
+  ], [guardNavigate]);
+
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const lastBackAt = React.useRef(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -326,31 +379,33 @@ export default function App() {
    */
   useEffect(() => {
     const unsubscribe = onNotificationTap((route) => {
-      if (route === 'routine') {
+      guardNavigate(() => {
+        if (route === 'routine') {
+          setActiveSection(null);
+          setActiveTab('routine');
+          return;
+        }
+        if (route === 'cycle') {
+          setActiveSection(null);
+          setActiveTab('cycle');
+          return;
+        }
+        if (route === 'appointments') {
+          setActiveTab('home');
+          setActiveSection('salon');
+          return;
+        }
+        if (route === 'medications') {
+          setActiveTab('home');
+          setActiveSection('clinic');
+          return;
+        }
         setActiveSection(null);
-        setActiveTab('routine');
-        return;
-      }
-      if (route === 'cycle') {
-        setActiveSection(null);
-        setActiveTab('cycle');
-        return;
-      }
-      if (route === 'appointments') {
         setActiveTab('home');
-        setActiveSection('salon');
-        return;
-      }
-      if (route === 'medications') {
-        setActiveTab('home');
-        setActiveSection('clinic');
-        return;
-      }
-      setActiveSection(null);
-      setActiveTab('home');
+      });
     });
     return unsubscribe;
-  }, []);
+  }, [guardNavigate]);
 
   // نوبت‌ها (ایجاد/انجام‌شد/لغو) مستقیم روی LocalDB نوشته می‌شوند، نه
   // روی userState — پس افکت بالا (که فقط به تغییر userState/resume گوش
@@ -372,7 +427,7 @@ export default function App() {
       return true;
     }
     if (activeSection) {
-      setActiveSection(null);
+      guardNavigate(() => setActiveSection(null));
       return true;
     }
     if (activeTab !== 'home') {
@@ -387,7 +442,7 @@ export default function App() {
       lastBackAt.current = now;
     }
     return true;
-  }, [isDrawerOpen, activeSection, activeTab]);
+  }, [isDrawerOpen, activeSection, activeTab, guardNavigate]);
 
   useEffect(() => {
     let remove: (() => void) | undefined;
@@ -472,9 +527,11 @@ export default function App() {
 
         {activeSection === 'profile' && (
           <ProfileView
+            ref={profileViewRef}
             userState={userState}
             onUpdateState={handleUpdateUserState}
             notificationStatus={notificationStatus}
+            onDirtyChange={setIsProfileDirty}
           />
         )}
         {activeSection === 'cycle' && (
@@ -540,9 +597,9 @@ export default function App() {
         todayLog={todayLog}
         onOpenDrawer={() => setIsDrawerOpen(true)}
         onToggleTheme={handleToggleTheme}
-        onNavigateTab={(tab) => { setActiveTab(tab); setActiveSection(null); }}
-        onFocusSunscreenCard={() => { setActiveTab('home'); setActiveSection(null); setHomeFocusRequest({ target: 'sunscreen', requestedAt: Date.now() }); }}
-        onOpenSection={(section) => { setActiveSection(section); setIsDrawerOpen(false); }}
+        onNavigateTab={(tab) => guardNavigate(() => { setActiveTab(tab); setActiveSection(null); })}
+        onFocusSunscreenCard={() => guardNavigate(() => { setActiveTab('home'); setActiveSection(null); setHomeFocusRequest({ target: 'sunscreen', requestedAt: Date.now() }); })}
+        onOpenSection={(section) => guardNavigate(() => { setActiveSection(section); setIsDrawerOpen(false); })}
         onOpenSearch={() => setIsSearchOpen(true)}
       />
 
@@ -559,17 +616,17 @@ export default function App() {
         onClose={() => setIsDrawerOpen(false)}
         userState={userState}
         cycleVisible={cycleVisible}
-        onNavigateTab={(tab) => {
+        onNavigateTab={(tab) => guardNavigate(() => {
           setActiveSection(null);
           setActiveTab(tab);
           const key = tab as TourKey;
           setTourKey(localStorage.getItem(`roza_tour_${key}_v1`) === '1' ? null : key);
-        }}
-        onOpenSection={(section) => {
+        })}
+        onOpenSection={(section) => guardNavigate(() => {
           setActiveSection(section);
           const key = sectionTourKey(section);
           setTourKey(!key || localStorage.getItem(`roza_tour_${key}_v1`) === '1' ? null : key);
-        }}
+        })}
         onToggleTheme={handleToggleTheme}
       />
 
@@ -624,16 +681,33 @@ export default function App() {
 
       <BottomNavigation
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveSection(null);
-          setActiveTab(tab);
-          const key = tab as TourKey;
-          setTourKey(localStorage.getItem(`roza_tour_${key}_v1`) === '1' ? null : key);
-        }}
-        onFabClick={() => setActiveSection('personalRoutine')}
-        fabLabel="افزودن برنامه شخصی امروز"
+        onTabChange={handleBottomNavTabChange}
+        fabActions={fabActions}
       />
       {tourKey && <FeatureTourOverlay tourKey={tourKey} onDone={() => setTourKey(null)} />}
+
+      {pendingProfileNav && (
+        <div className="fixed inset-0 z-[90] bg-[#20334d]/45 flex items-center justify-center p-5">
+          <div className="w-full max-w-sm rounded-[2rem] bg-[#fffdf9] dark:bg-slate-900 p-5 text-center shadow-2xl space-y-4">
+            <h2 className="text-base font-black text-[#263b56] dark:text-white">تغییرات ذخیره نشده</h2>
+            <p className="text-sm leading-7 text-slate-500 dark:text-slate-400">در تنظیمات تغییراتی دادی که هنوز ذخیره نشده. می‌خوای قبل از خروج ذخیره شود؟</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { const nav = pendingProfileNav; setPendingProfileNav(null); nav?.(); }}
+                className="flex-1 rounded-2xl bg-slate-100 dark:bg-slate-800 py-3 text-sm font-bold"
+              >
+                خیر
+              </button>
+              <button
+                onClick={() => { profileViewRef.current?.save(); const nav = pendingProfileNav; setPendingProfileNav(null); nav?.(); }}
+                className="flex-1 rounded-2xl bg-rose-500 py-3 text-sm font-bold text-white"
+              >
+                بله
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showExitConfirm && (
         <div className="fixed inset-0 z-[90] bg-[#20334d]/45 flex items-center justify-center p-5">

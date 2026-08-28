@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Camera, Trash2, ImageIcon, BarChart3, AlertTriangle } from 'lucide-react';
+import { Camera, Trash2, ImageIcon, BarChart3, AlertTriangle, CalendarDays, ArrowLeftRight } from 'lucide-react';
 import { PhotoProgress } from '../../types';
 import { LocalDB } from '../../services/db';
 import { deletePhoto, getPhotoUrl, savePhoto } from '../../services/photoService';
@@ -17,6 +17,7 @@ import {
 } from '../../services/jalali';
 import { EmptyState } from '../common/EmptyState';
 import { JalaliDatePicker } from '../common/JalaliDatePicker';
+import { PrettySelect } from '../common/PrettySelect';
 
 interface ProgressTrackerProps {
   initialTab?: 'photos' | 'stats';
@@ -152,33 +153,46 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({ initialTab = '
           {/* مقایسه قبل و بعد */}
           {photos.length >= 2 && (
             <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-rose-100 dark:border-slate-800 space-y-3">
-              <h4 className="text-sm font-black text-slate-800 dark:text-white">مقایسه قبل و بعد</h4>
+              <h4 className="text-sm font-black text-slate-800 dark:text-white flex items-center gap-1.5">
+                <ArrowLeftRight className="w-4 h-4 text-rose-500" />
+                مقایسه قبل و بعد
+              </h4>
               <div className="grid grid-cols-2 gap-3">
                 {(
                   [
-                    { labelFa: 'قبل', value: compareBefore, set: setCompareBefore, photo: beforePhoto },
-                    { labelFa: 'بعد', value: compareAfter, set: setCompareAfter, photo: afterPhoto },
+                    { key: 'before', labelFa: 'قبل', accent: 'text-slate-500 bg-slate-100 dark:bg-slate-800', value: compareBefore, set: setCompareBefore, photo: beforePhoto },
+                    { key: 'after', labelFa: 'بعد', accent: 'text-rose-600 bg-rose-50 dark:bg-rose-950/40', value: compareAfter, set: setCompareAfter, photo: afterPhoto },
                   ]
                 ).map((slot) => (
-                  <div key={slot.labelFa} className="space-y-1.5">
-                    <select
-                      value={slot.value || ''}
-                      onChange={(event) => slot.set(event.target.value || null)}
-                      className="w-full py-2.5 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold"
-                    >
-                      <option value="">{slot.labelFa}</option>
-                      {photos.map((photo) => (
-                        <option key={photo.id} value={photo.id}>
-                          {formatJalaliDate(photo.date)}
-                        </option>
-                      ))}
-                    </select>
+                  <div key={slot.key} className="space-y-2">
+                    <div className="flex items-center justify-between px-0.5">
+                      <span className={`text-[11px] font-black px-2 py-0.5 rounded-lg ${slot.accent}`}>{slot.labelFa}</span>
+                    </div>
 
-                    <div className="h-44 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center">
+                    <PrettySelect
+                      value={slot.value || ''}
+                      onChange={(value) => slot.set(value || null)}
+                      placeholder="انتخاب تاریخ"
+                      options={photos.map((photo) => ({
+                        value: photo.id,
+                        label: formatJalaliDate(photo.date),
+                      }))}
+                    />
+
+                    <div className="h-44 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden flex items-center justify-center relative">
                       {slot.photo ? (
-                        <PhotoImage photo={slot.photo} className="w-full h-full object-cover" />
+                        <>
+                          <PhotoImage photo={slot.photo} className="w-full h-full object-cover" />
+                          <span className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-center gap-1 py-1 rounded-lg bg-black/45 backdrop-blur-xs text-[10px] font-bold text-white">
+                            <CalendarDays className="w-3 h-3" />
+                            {formatJalaliDate(slot.photo.date)}
+                          </span>
+                        </>
                       ) : (
-                        <span className="text-xs text-slate-400">انتخاب کن</span>
+                        <span className="text-xs text-slate-400 flex flex-col items-center gap-1.5">
+                          <CalendarDays className="w-6 h-6 text-slate-300" />
+                          یک تاریخ انتخاب کن
+                        </span>
                       )}
                     </div>
                   </div>
