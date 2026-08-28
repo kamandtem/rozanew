@@ -4,63 +4,63 @@ import { Article } from '../../types';
 export const EXTRA_ARTICLES: Article[] = [
   {
     id: 'art_practical_01', titleFa: 'روتین ساده برای شروع', categoryId: 'cat_routines', categoryFa: 'روتین‌های روزانه',
-    imageUrl: '/assets/real/articles/article-1.webp',
+    imageUrl: '/assets/real/articles/article-7.webp',
     summaryFa: 'برای شروع فقط سه کار ثابت داشته باش: شوینده ملایم، مرطوب‌کننده و ضدآفتاب.',
     fullContentFa: 'اگر تازه می‌خواهی روتین بسازی، محصول زیاد نخر. صبح صورتت را با شوینده ملایم بشوی، مرطوب‌کننده بزن و ضدآفتاب را آخر کار استفاده کن. شب ضدآفتاب و آرایش را پاک کن، صورتت را بشوی و مرطوب‌کننده بزن. بعد از دو تا سه هفته، اگر پوستت آرام بود، فقط یک ترکیب جدید اضافه کن. سوزش، قرمزی ماندگار یا خارش یعنی باید محصول جدید را قطع کنی.',
     tagsFa: ['شروع روتین', 'مبتدی', 'ضدآفتاب'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Dryness', 'Acne'],
   },
   {
     id: 'art_practical_02', titleFa: 'از کجا بفهمم محصولی به پوستم نمی‌سازد؟', categoryId: 'cat_ingredients', categoryFa: 'ترکیبات موثره',
-    imageUrl: '/assets/real/articles/article-2.webp',
+    imageUrl: '/assets/real/articles/article-8.webp',
     summaryFa: 'هر محصول جدید را یک‌باره روی تمام صورت نزن؛ اول تست محدود و چند روز صبر کن.',
     fullContentFa: 'مقدار کمی از محصول را روی بخش کوچکی از فک یا پشت گوش بزن. اگر تا ۲۴ تا ۴۸ ساعت خارش، تورم، سوزش شدید یا قرمزی ماندگار نداشتی، آن را دو تا سه شب در هفته استفاده کن. همزمان چند محصول جدید شروع نکن، چون نمی‌فهمی کدام‌یک باعث واکنش شده است. سوزش شدید، ورم لب یا تنگی نفس نیاز به کمک پزشکی فوری دارد.',
     tagsFa: ['تست محصول', 'حساسیت', 'ایمنی'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Sensitive Skin'],
   },
   {
     id: 'art_practical_03', titleFa: 'ضدآفتاب را چطور درست استفاده کنیم؟', categoryId: 'cat_sun_protection', categoryFa: 'محافظت در برابر خورشید',
-    imageUrl: '/assets/real/articles/article-3.webp',
+    imageUrl: '/assets/real/articles/article-9.webp',
     summaryFa: 'دو بند انگشت برای صورت و گردن، و در بیرون از خانه تجدید دوباره.',
     fullContentFa: 'ضدآفتاب باید آخرین مرحله روتین صبح باشد. برای صورت و گردن حدود دو بند انگشت مقدار بزن. اگر بیرون هستی، عرق می‌کنی یا صورتت را می‌شویی، آن را تجدید کن. ضدآفتاب جای کلاه، سایه و دوری از آفتاب شدید را نمی‌گیرد. اگر پوستت لک می‌زند، منظم بودن مصرف از برند گران‌تر مهم‌تر است.',
     tagsFa: ['ضدآفتاب', 'لک', 'آفتاب'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Hyperpigmentation'],
   },
   {
     id: 'art_practical_04', titleFa: 'پوست و چرخه ماهانه، بدون وعده‌های عجیب', categoryId: 'cat_hormones', categoryFa: 'چرخه ماهانه',
-    imageUrl: '/assets/real/articles/article-4.webp',
+    imageUrl: '/assets/real/articles/article-10.webp',
     summaryFa: 'چرخه می‌تواند سرنخ بدهد، اما از روی روز چرخه نمی‌شود تشخیص پزشکی داد.',
     fullContentFa: 'بعضی افراد چند روز قبل از پریود جوش، چربی، درد یا حساسیت بیشتری دارند و بعضی افراد چنین الگویی ندارند. رزا با ثبت‌های خودت دنبال الگو می‌گردد، نه اینکه از یک فرمول عمومی نتیجه قطعی بسازد. اگر چرخه خیلی نامنظم است، درد شدید داری یا جوش و پرمویی ناگهانی ایجاد شده، ثبت‌های خودت را برای پزشک ببر. چرخه جای تشخیص یا آزمایش پزشکی نیست.',
     tagsFa: ['چرخه', 'جوش هورمونی', 'پزشک'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Hormonal Acne'],
   },
   {
     id: 'art_practical_05', titleFa: 'بعد از لیزر و وکس چه کنیم؟', categoryId: 'cat_routines', categoryFa: 'روتین‌های روزانه',
-    imageUrl: '/assets/real/articles/article-5.webp',
+    imageUrl: '/assets/real/articles/article-11.webp',
     summaryFa: 'بعد از خدمات زیبایی، پوست را ساده نگه دار: شوینده ملایم، ترمیم‌کننده و ضدآفتاب.',
     fullContentFa: 'مدت پرهیز به نوع خدمت و نظر متخصص بستگی دارد. معمولاً بعد از لیزر، وکس، پیلینگ یا میکرونیدلینگ نباید بلافاصله سراغ رتینول و اسیدها بروی. تا وقتی پوست آرام نشده، از گرمای شدید، آفتاب، سونا و دستکاری پوست دوری کن. اگر تاول، درد شدید، ترشح یا قرمزی رو به افزایش داشتی، با مرکز درمانی یا پزشک تماس بگیر.',
     tagsFa: ['لیزر', 'وکس', 'مراقبت بعد'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Redness'],
   },
   {
     id: 'art_practical_06', titleFa: 'چه زمانی باید به پزشک پوست مراجعه کنم؟', categoryId: 'cat_skin_types', categoryFa: 'شناخت پوست',
-    imageUrl: '/assets/real/articles/article-6.webp',
+    imageUrl: '/assets/real/articles/article-12.webp',
     summaryFa: 'درد، زخم، عفونت، تغییر سریع یا ماندگاری مشکل، علامت مراجعه است.',
     fullContentFa: 'اگر جوش‌ها دردناک و عمیق‌اند، جای زخم می‌گذارند، قرمزی ماندگار است، خارش شدید داری، خال یا لکه‌ای تغییر سریع کرده، یا مراقبت ساده بعد از چند هفته کمکی نکرده است، وقت پزشک بگیر. در این شرایط دنبال تشخیص از روی مقاله یا عکس نباش. اطلاعات محصولات، داروها، چرخه و عکس‌های ثبت‌شده را در ویزیت نشان بده تا پزشک تصویر کامل‌تری داشته باشد.',
     tagsFa: ['پزشک پوست', 'هشدار', 'ایمنی'], readTimeMin: 2, difficultyFa: 'مقدماتی', relatedSkinProblems: ['Acne', 'Rosacea', 'Eczema'],
   },
 
   {
-    id: 'art_practical_07', imageUrl: '/assets/real/articles/article-1.webp', titleFa: 'چطور نوع پوست خودمان را بشناسیم؟', categoryId: 'cat_skin_types', categoryFa: 'شناخت پوست', summaryFa: 'پوست چرب، خشک، مختلط و حساس را با چند نشانه ساده از هم تشخیص بده.', fullContentFa: 'بعد از شست‌وشوی صورت، سی دقیقه چیزی نزن. اگر کل صورت برق افتاد، احتمالاً چرب است. اگر کشیدگی و پوسته‌ریزی داشتی، احتمالاً خشک است. اگر پیشانی و بینی چرب و گونه‌ها خشک یا معمولی بود، پوست مختلط است. قرمزی و سوزش سریع بیشتر به حساسیت مربوط می‌شود، نه یک نوع پوست مستقل. این تست تقریبی است و تشخیص پزشک نیست.', tagsFa: ['نوع پوست', 'شروع'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_07', imageUrl: '/assets/real/articles/article-13.webp', titleFa: 'چطور نوع پوست خودمان را بشناسیم؟', categoryId: 'cat_skin_types', categoryFa: 'شناخت پوست', summaryFa: 'پوست چرب، خشک، مختلط و حساس را با چند نشانه ساده از هم تشخیص بده.', fullContentFa: 'بعد از شست‌وشوی صورت، سی دقیقه چیزی نزن. اگر کل صورت برق افتاد، احتمالاً چرب است. اگر کشیدگی و پوسته‌ریزی داشتی، احتمالاً خشک است. اگر پیشانی و بینی چرب و گونه‌ها خشک یا معمولی بود، پوست مختلط است. قرمزی و سوزش سریع بیشتر به حساسیت مربوط می‌شود، نه یک نوع پوست مستقل. این تست تقریبی است و تشخیص پزشک نیست.', tagsFa: ['نوع پوست', 'شروع'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
   {
-    id: 'art_practical_08', imageUrl: '/assets/real/articles/article-2.webp', titleFa: 'ترتیب درست محصولات پوستی', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'از بافت سبک شروع کن و محصول غلیظ‌تر را آخر بزن.', fullContentFa: 'صبح معمولاً شوینده، سرم سبک، مرطوب‌کننده و ضدآفتاب است. شب پاک کردن ضدآفتاب یا آرایش، شوینده، محصول درمانی و مرطوب‌کننده را انجام بده. لازم نیست همه این مراحل را داشته باشی؛ اگر فقط شوینده، مرطوب‌کننده و ضدآفتاب داری، برای شروع کافی است.', tagsFa: ['ترتیب محصولات', 'روتین'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_08', imageUrl: '/assets/real/articles/article-14.webp', titleFa: 'ترتیب درست محصولات پوستی', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'از بافت سبک شروع کن و محصول غلیظ‌تر را آخر بزن.', fullContentFa: 'صبح معمولاً شوینده، سرم سبک، مرطوب‌کننده و ضدآفتاب است. شب پاک کردن ضدآفتاب یا آرایش، شوینده، محصول درمانی و مرطوب‌کننده را انجام بده. لازم نیست همه این مراحل را داشته باشی؛ اگر فقط شوینده، مرطوب‌کننده و ضدآفتاب داری، برای شروع کافی است.', tagsFa: ['ترتیب محصولات', 'روتین'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
   {
-    id: 'art_practical_09', imageUrl: '/assets/real/articles/article-3.webp', titleFa: 'جوش را فشار ندهیم یا بدهیم؟', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'فشار دادن جوش می‌تواند التهاب و جای جوش را بیشتر کند.', fullContentFa: 'دستکاری جوش با ناخن باعث ورود آلودگی و آسیب بیشتر به پوست می‌شود. اگر جوش دردناک و عمیق است یا مرتب برمی‌گردد، به متخصص پوست مراجعه کن. برای جوش‌های معمولی، روتین آرام و ثابت بهتر از چند درمان همزمان است.', tagsFa: ['جوش', 'جای جوش'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_09', imageUrl: '/assets/real/articles/article-15.webp', titleFa: 'جوش را فشار ندهیم یا بدهیم؟', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'فشار دادن جوش می‌تواند التهاب و جای جوش را بیشتر کند.', fullContentFa: 'دستکاری جوش با ناخن باعث ورود آلودگی و آسیب بیشتر به پوست می‌شود. اگر جوش دردناک و عمیق است یا مرتب برمی‌گردد، به متخصص پوست مراجعه کن. برای جوش‌های معمولی، روتین آرام و ثابت بهتر از چند درمان همزمان است.', tagsFa: ['جوش', 'جای جوش'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
   {
-    id: 'art_practical_10', imageUrl: '/assets/real/articles/article-4.webp', titleFa: 'مراقبت از پوست در هوای خشک و آلوده', categoryId: 'cat_lifestyle', categoryFa: 'سبک زندگی', summaryFa: 'پاکسازی ملایم، مرطوب‌کننده و ضدآفتاب، سه کار اصلی برای شهرهای خشک و آلوده‌اند.', fullContentFa: 'آب داغ و شست‌وشوی زیاد سد دفاعی پوست را ضعیف می‌کند. شب آلودگی و ضدآفتاب را آرام پاک کن، بعد مرطوب‌کننده بزن. در هوای خشک، آب‌رسان را روی پوست کمی نم‌دار استفاده کن و روی آن مرطوب‌کننده بزن.', tagsFa: ['آلودگی', 'خشکی هوا'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_10', imageUrl: '/assets/real/articles/article-16.webp', titleFa: 'مراقبت از پوست در هوای خشک و آلوده', categoryId: 'cat_lifestyle', categoryFa: 'سبک زندگی', summaryFa: 'پاکسازی ملایم، مرطوب‌کننده و ضدآفتاب، سه کار اصلی برای شهرهای خشک و آلوده‌اند.', fullContentFa: 'آب داغ و شست‌وشوی زیاد سد دفاعی پوست را ضعیف می‌کند. شب آلودگی و ضدآفتاب را آرام پاک کن، بعد مرطوب‌کننده بزن. در هوای خشک، آب‌رسان را روی پوست کمی نم‌دار استفاده کن و روی آن مرطوب‌کننده بزن.', tagsFa: ['آلودگی', 'خشکی هوا'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
   {
-    id: 'art_practical_11', imageUrl: '/assets/real/articles/article-5.webp', titleFa: 'آرایش و مراقبت از پوست', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'مهم‌تر از برند آرایش، پاک کردن کامل و آرام آن قبل از خواب است.', fullContentFa: 'با آرایش نخواب. اول محصول پاک‌کننده مناسب استفاده کن، بعد شوینده ملایم بزن. اگر پوستت حساس است، پد را روی پوست نکش و چند ثانیه نگه دار تا محصول حل شود. براش‌ها و اسفنج‌ها را هم مرتب تمیز کن.', tagsFa: ['آرایش', 'پاکسازی'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_11', imageUrl: '/assets/real/articles/article-17.webp', titleFa: 'آرایش و مراقبت از پوست', categoryId: 'cat_routines', categoryFa: 'روتین', summaryFa: 'مهم‌تر از برند آرایش، پاک کردن کامل و آرام آن قبل از خواب است.', fullContentFa: 'با آرایش نخواب. اول محصول پاک‌کننده مناسب استفاده کن، بعد شوینده ملایم بزن. اگر پوستت حساس است، پد را روی پوست نکش و چند ثانیه نگه دار تا محصول حل شود. براش‌ها و اسفنج‌ها را هم مرتب تمیز کن.', tagsFa: ['آرایش', 'پاکسازی'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
   {
-    id: 'art_practical_12', imageUrl: '/assets/real/articles/article-6.webp', titleFa: 'محصول جدید را چطور وارد روتین کنیم؟', categoryId: 'cat_ingredients', categoryFa: 'ترکیبات', summaryFa: 'هر بار فقط یک محصول تازه و با فاصله چند روز اضافه کن.', fullContentFa: 'اگر همزمان سه محصول جدید شروع کنی، علت واکنش پوستت مشخص نمی‌شود. یک محصول را مقدار کم و با فاصله شروع کن. اگر خارش، ورم یا سوزش شدید ایجاد شد، مصرف را قطع کن و در صورت ماندگاری با پزشک مشورت کن.', tagsFa: ['محصول جدید', 'تست'], readTimeMin: 2, difficultyFa: 'مقدماتی'
+    id: 'art_practical_12', imageUrl: '/assets/real/articles/article-18.webp', titleFa: 'محصول جدید را چطور وارد روتین کنیم؟', categoryId: 'cat_ingredients', categoryFa: 'ترکیبات', summaryFa: 'هر بار فقط یک محصول تازه و با فاصله چند روز اضافه کن.', fullContentFa: 'اگر همزمان سه محصول جدید شروع کنی، علت واکنش پوستت مشخص نمی‌شود. یک محصول را مقدار کم و با فاصله شروع کن. اگر خارش، ورم یا سوزش شدید ایجاد شد، مصرف را قطع کن و در صورت ماندگاری با پزشک مشورت کن.', tagsFa: ['محصول جدید', 'تست'], readTimeMin: 2, difficultyFa: 'مقدماتی'
   },
 ];
